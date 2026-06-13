@@ -1,226 +1,196 @@
 import streamlit as st
 
-# 1. SETTING PAGE & TEMA GELAP
+# 1. SETTING PAGE & LAYOUT WIDE (Agar muat 3 kolom bersanding seperti di gambar)
 st.set_page_config(
-    page_title="Mining Production Optimizer - IME Roleplay",
+    page_title="Mining Production Optimizer v3.1.0",
     page_icon="⛏️",
     layout="wide"
 )
 
-# 2. INJEKSI CSS CUSTOM (Warna gelap pekat, tombol hijau neon & merah, teks terminal)
+# 2. INJEKSI CSS CUSTOM (Mengubah tampilan Streamlit menjadi tema gelap & kotak persis di gambar)
 st.markdown("""
     <style>
-    .stApp { background-color: #1e1e24 !important; }
-    h1, h2, h3 { color: #ffffff !important; font-family: 'Arial', sans-serif; font-weight: bold; }
-    h1 { text-align: center; margin-bottom: 20px; }
-    .stNumberInput div div input { background-color: #2d2d34 !important; color: #ffffff !important; border: 1px solid #555555 !important; }
-    label p { color: #e0e0e0 !important; font-weight: 500 !important; }
+    /* Background Utama */
+    .stApp { background-color: #0d0d0d !important; }
     
-    /* KOTAK HASIL KALKULASI (Terminal Hitam) */
+    /* Judul Aplikasi Atas */
+    .main-title {
+        color: #f1c40f !important;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        font-size: 32px;
+        margin-bottom: 5px;
+    }
+    .version-text {
+        color: #888888 !important;
+        text-align: center;
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+    
+    /* Style Kotak Level (Card) */
+    .level-card {
+        background-color: #1a1a1a !important;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        min-height: 750px;
+    }
+    
+    /* Border Atas Berwarna sesuai Gambar */
+    .lvl0-box { border-top: 4px solid #f39c12; }
+    .lvl1-box { border-top: 4px solid #3498db; }
+    .lvl2-box { border-top: 4px solid #e74c3c; }
+    
+    /* Judul di setiap kolom Level */
+    .level-title {
+        color: #ffffff !important;
+        font-size: 20px !important;
+        font-weight: bold !important;
+        margin-bottom: 20px !important;
+    }
+    
+    /* Custom Input Box agar Ringkas ke Samping */
+    .stNumberInput div div input {
+        background-color: #111111 !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+        text-align: center;
+    }
+    label p { color: #aaaaaa !important; font-size: 14px !important; }
+    
+    /* Kotak Hasil Terminal Hijau di Bagian Bawah */
     .terminal-box {
-        background-color: #0c0c0d !important;
-        color: #33ff33 !important;
+        background-color: #050505 !important;
+        color: #2ecc71 !important;
         font-family: 'Courier New', Courier, monospace !important;
         padding: 20px;
         border-radius: 5px;
-        border: 1px solid #333333;
+        border: 1px solid #222222;
         white-space: pre-wrap;
-        height: 580px;
-        overflow-y: auto;
-        box-shadow: inset 0 0 10px #000000;
+        margin-top: 20px;
     }
     
-    /* TOMBOL HITUNG (Hijau Neon) */
+    /* Tombol Hitung Hijau Neon */
     div.stButton > button:first-child {
         background-color: #2ecc71 !important;
         color: #000000 !important;
         font-weight: bold !important;
         border: none !important;
-        width: 100%;
-        height: 45px;
+        height: 50px;
+        font-size: 16px;
     }
     div.stButton > button:first-child:hover { background-color: #27ae60 !important; color: #ffffff !important; }
-    
-    /* TOMBOL RESET (Merah) */
-    div.stButton > button.reset-btn {
-        background-color: #e74c3c !important;
-        color: #ffffff !important;
-        font-weight: bold !important;
-        border: none !important;
-        width: 100%;
-        height: 45px;
-    }
-    div.stButton > button.reset-btn:hover { background-color: #c0392b !important; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>MINING PRODUCTION OPTIMIZER (FULL LEVEL)</h1>", unsafe_allow_html=True)
+# Headings Utama
+st.markdown('<div class="main-title">Mining Production Optimizer</div>', unsafe_allow_html=True)
+st.markdown('<div class="version-text">v3.1.0</div>', unsafe_allow_html=True)
 
-# 3. INITIAL DATABASE HARGA PASAR (NPC)
-if "prices" not in st.session_state:
-    st.session_state.prices = {
-        "silver_ore": 30, "gold_ore": 50, "diamond_ore": 80, "ruby_ore": 70, # Lvl 0
-        "silver_ingot": 150, "gold_ingot": 300, "diamond": 500, "ruby": 400, # Lvl 1
-        "silver_wire": 0, "gold_chain": 0, # Lvl 2 (Tidak laku dijual)
-        "silver_diamond_ring": 1200, "gold_ruby_necklace": 1500 # Lvl 3
-    }
+# 3. MEMBUAT TIGA KOLOM UTAMA SESUAI GAMBAR
+col0, col1, col2 = st.columns(3)
 
-if "terminal_output" not in st.session_state:
-    st.session_state.terminal_output = "Masukkan data inventory Anda, lalu klik 'Hitung Produksi (AI Optimizer)'..."
-
-# 4. TATA LETAK UTAMA (KIRI: INPUT & EDITOR, KANAN: TERMINAL HASIL)
-col_left, col_right = st.columns([1.1, 0.9])
-
-with col_left:
-    tab1, tab2 = st.tabs(["🎒 INPUT INVENTORY", "⚙️ EDITOR HARGA NPC"])
+# --- LEVEL 0: RAW MATERIALS ---
+with col0:
+    st.markdown('<div class="level-card lvl0-box">', unsafe_allow_html=True)
+    st.markdown('<p class="level-title">Level 0: Raw Materials</p>', unsafe_allow_html=True)
     
-    with tab1:
-        st.markdown("### 🪨 Level 0 - Bahan Mentah (Ore / Kasar)")
-        c0_1, c0_2 = st.columns(2)
-        with c0_1:
-            ore_silver = st.number_input("Silver Ore", min_value=0, value=0, step=1)
-            ore_gold = st.number_input("Gold Ore", min_value=0, value=0, step=1)
-        with c0_2:
-            ore_diamond = st.number_input("Uncut Diamond", min_value=0, value=0, step=1)
-            ore_ruby = st.number_input("Uncut Ruby", min_value=0, value=0, step=1)
-            
-        st.markdown("### 🪙 Level 1 - Bahan Matang (Smelted)")
-        c1_1, c1_2 = st.columns(2)
-        with c1_1:
-            ing_silver = st.number_input("Silver Ingot", min_value=0, value=0, step=1)
-            ing_gold = st.number_input("Gold Ingot", min_value=0, value=0, step=1)
-        with c1_2:
-            gem_diamond = st.number_input("Diamond (Clean)", min_value=0, value=0, step=1)
-            gem_ruby = st.number_input("Ruby (Clean)", min_value=0, value=0, step=1)
-
-        st.markdown("### 🛠️ Level 2 - Sisa Setengah Jadi (Crafted Component)")
-        c2_1, c2_2 = st.columns(2)
-        with c2_1:
-            comp_wire = st.number_input("Silver Wire / Ring Band", min_value=0, value=0, step=1)
-        with c2_2:
-            comp_chain = st.number_input("Gold Chain / Frame", min_value=0, value=0, step=1)
-
-    with tab2:
-        st.markdown("### 💲 Atur Harga Jual ke Pemerintahan/NPC")
-        p = st.session_state.prices
-        ce1, ce2 = st.columns(2)
-        with ce1:
-            p["silver_ore"] = st.number_input("Harga Silver Ore", min_value=0, value=p["silver_ore"])
-            p["gold_ore"] = st.number_input("Harga Gold Ore", min_value=0, value=p["gold_ore"])
-            p["silver_ingot"] = st.number_input("Harga Silver Ingot", min_value=0, value=p["silver_ingot"])
-            p["gold_ingot"] = st.number_input("Harga Gold Ingot", min_value=0, value=p["gold_ingot"])
-            p["silver_diamond_ring"] = st.number_input("Harga Silver Diamond Ring (Lvl 3)", min_value=0, value=p["silver_diamond_ring"])
-        with ce2:
-            p["diamond_ore"] = st.number_input("Harga Uncut Diamond", min_value=0, value=p["diamond_ore"])
-            p["ruby_ore"] = st.number_input("Harga Uncut Ruby", min_value=0, value=p["ruby_ore"])
-            p["diamond"] = st.number_input("Harga Diamond", min_value=0, value=p["diamond"])
-            p["ruby"] = st.number_input("Harga Ruby", min_value=0, value=p["ruby"])
-            p["gold_ruby_necklace"] = st.number_input("Harga Gold Ruby Necklace (Lvl 3)", min_value=0, value=p["gold_ruby_necklace"])
-
-with col_right:
-    st.markdown("### 📊 HASIL ANALISIS OPTIMAL")
-    st.markdown(f'<div class="terminal-box">{st.session_state.terminal_output}</div>', unsafe_allow_html=True)
-    st.write("")
+    lvl0_copper = st.number_input("Copper Ore", min_value=0, value=0, step=1)
+    lvl0_iron = st.number_input("Iron Ore", min_value=0, value=0, step=1)
+    lvl0_silver = st.number_input("Silver Ore", min_value=0, value=0, step=1)
+    lvl0_gold = st.number_input("Gold Ore", min_value=0, value=0, step=1)
+    lvl0_aluminium = st.number_input("Aluminium Ore", min_value=0, value=0, step=1)
+    lvl0_coal = st.number_input("Coal", min_value=0, value=0, step=1)
+    lvl0_bottle = st.number_input("Empty Bottle", min_value=0, value=0, step=1)
+    lvl0_emerald = st.number_input("Uncut Emerald", min_value=0, value=0, step=1)
+    lvl0_ruby = st.number_input("Uncut Ruby", min_value=0, value=0, step=1)
+    lvl0_sapphire = st.number_input("Uncut Sapphire", min_value=0, value=0, step=1)
+    lvl0_diamond = st.number_input("Uncut Diamond", min_value=0, value=0, step=1)
     
-    # Tombol Kontrol
-    btn_c1, btn_c2 = st.columns(2)
-    with btn_c1:
-        hitung = st.button("Hitung Produksi (AI Optimizer)")
-    with btn_c2:
-        reset = st.button("Reset Input", key="btn_reset")
-        st.markdown("<script>document.querySelectorAll('button')[1].classList.add('reset-btn');</script>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# 5. LOGIKA PERHITUNGAN AI OPTIMIZER BERTINGKAT
-if hitung:
-    p = st.session_state.prices
+# --- LEVEL 1: INGOTS & GEMS ---
+with col1:
+    st.markdown('<div class="level-card lvl1-box">', unsafe_allow_html=True)
+    st.markdown('<p class="level-title">Level 1: Ingots & Gems</p>', unsafe_allow_html=True)
     
-    # --- PROSES SIMULASI PELEBURAN (LEVEL 0 ke LEVEL 1) ---
-    # Asumsi resep game: 5 Ore = 1 Ingot/Gems matang
-    smelted_silver = ore_silver // 5
-    sisa_ore_silver = ore_silver % 5
+    lvl1_gold = st.number_input("Gold Ingot", min_value=0, value=0, step=1)
+    lvl1_silver = st.number_input("Silver Ingot", min_value=0, value=0, step=1)
+    lvl1_iron = st.number_input("Iron Ingot", min_value=0, value=0, step=1)
+    lvl1_copper = st.number_input("Copper Ingot", min_value=0, value=0, step=1)
+    lvl1_aluminium = st.number_input("Aluminium Ingot", min_value=0, value=0, step=1)
+    lvl1_steel = st.number_input("Steel Ingot", min_value=0, value=0, step=1)
+    lvl1_glass = st.number_input("Glass", min_value=0, value=0, step=1)
+    lvl1_emerald = st.number_input("Emerald", min_value=0, value=0, step=1)
+    lvl1_ruby = st.number_input("Ruby", min_value=0, value=0, step=1)
+    lvl1_sapphire = st.number_input("Sapphire", min_value=0, value=0, step=1)
+    lvl1_diamond = st.number_input("Diamond", min_value=0, value=0, step=1)
     
-    smelted_gold = ore_gold // 5
-    sisa_ore_gold = ore_gold % 5
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# --- LEVEL 2: COMPONENTS ---
+with col2:
+    st.markdown('<div class="level-card lvl2-box">', unsafe_allow_html=True)
+    st.markdown('<p class="level-title">Level 2: Components (Perhiasan Jadi)</p>', unsafe_allow_html=True)
     
-    smelted_diamond = ore_diamond // 5
-    sisa_ore_diamond = ore_diamond % 5
+    lvl2_gold_ring = st.number_input("Gold Ring", min_value=0, value=0, step=1)
+    lvl2_silver_ring = st.number_input("Silver Ring", min_value=0, value=0, step=1)
+    lvl2_gold_chain = st.number_input("Gold Chain", min_value=0, value=0, step=1)
+    lvl2_silver_chain = st.number_input("Silver Chain", min_value=0, value=0, step=1)
+    lvl2_gold_earring = st.number_input("Gold Earring", min_value=0, value=0, step=1)
+    lvl2_silver_earring = st.number_input("Silver Earring", min_value=0, value=0, step=1)
     
-    smelted_ruby = ore_ruby // 5
-    sisa_ore_ruby = ore_ruby % 5
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.divider()
+
+# 4. ACTION BUTTON & TERMINAL OUTPUT
+if st.button("🚀 HITUNG PRODUKSI OPTIMAL (AI OPTIMIZER)", use_container_width=True):
     
-    # Total akumulasi di Level 1 (Inventory awal + Hasil peleburan Lvl 0)
-    total_silver_ingot = ing_silver + smelted_silver
-    total_gold_ingot = ing_gold + smelted_gold
-    total_diamond = gem_diamond + smelted_diamond
-    total_ruby = gem_ruby + smelted_ruby
-
-    # --- HITUNG HARGA JUAL JIKA LANGSUNG DIJUAL MENTAH (Tanpa Crafting) ---
-    nilai_mentah = (
-        (ore_silver * p["silver_ore"]) + (ore_gold * p["gold_ore"]) + 
-        (ore_diamond * p["diamond_ore"]) + (ore_ruby * p["ruby_ore"]) +
-        (ing_silver * p["silver_ingot"]) + (ing_gold * p["gold_ingot"]) + 
-        (gem_diamond * p["diamond"]) + (gem_ruby * p["ruby"]) +
-        (comp_wire * p["silver_wire"]) + (comp_chain * p["gold_chain"])
-    )
-
-    # --- PROSES CRAFTING PERHIASAN (LEVEL 1 & 2 ke LEVEL 3) ---
-    # Resep Ring: 1 Silver Ingot + 1 Diamond (Komponen Lvl 2 otomatis dibuat & dirakit)
-    crafted_rings = min(total_silver_ingot, total_diamond)
-    akhir_silver = total_silver_ingot - crafted_rings
-    akhir_diamond = total_diamond - crafted_rings
+    # --- LOGIKA SIMULASI PELEBURAN (Lvl 0 ke Lvl 1) ---
+    # Rumus standard: 5 Ore + Coal -> 1 Ingot Matang
+    smelted_gold = min(lvl0_gold // 5, lvl0_coal)
+    smelted_silver = min(lvl0_silver // 5, lvl0_coal)
+    smelted_diamond = lvl0_diamond // 5  # Permata biasanya tidak butuh coal/tergantung server
+    smelted_ruby = lvl0_ruby // 5
     
-    # Resep Necklace: 1 Gold Ingot + 1 Ruby
-    crafted_necklaces = min(total_gold_ingot, total_ruby)
-    akhir_gold = total_gold_ingot - crafted_necklaces
-    akhir_ruby = total_ruby - crafted_necklaces
+    # Akumulasi total stok matang di Level 1
+    total_gold_ingot = lvl1_gold + smelted_gold
+    total_silver_ingot = lvl1_silver + smelted_silver
+    total_diamond = lvl1_diamond + smelted_diamond
+    total_ruby = lvl1_ruby + smelted_ruby
 
-    # --- HITUNG TOTAL NILAI JUAL SETELAH OPTIMASI AI ---
-    nilai_optimal = (
-        (crafted_rings * p["silver_diamond_ring"]) + 
-        (crafted_necklaces * p["gold_ruby_necklace"]) +
-        # Ditambah sisa bahan yang terpaksa dijual eceran karena kekurangan pasangan:
-        (sisa_ore_silver * p["silver_ore"]) + (sisa_ore_gold * p["gold_ore"]) +
-        (sisa_ore_diamond * p["diamond_ore"]) + (sisa_ore_ruby * p["ruby_ore"]) +
-        (akhir_silver * p["silver_ingot"]) + (akhir_gold * p["gold_ingot"]) +
-        (akhir_diamond * p["diamond"]) + (akhir_ruby * p["ruby"]) +
-        (comp_wire * p["silver_wire"]) + (comp_chain * p["gold_chain"])
-    )
+    # --- LOGIKA CRAFTING OPTIMIZER KEBUTUHAN PERHIASAN ---
+    # Rekomendasi pembuatan komponen cincin & kalung berdasarkan stok batu permata yang paling bernilai tinggi
+    cincin_emas_diamond = min(total_gold_ingot, total_diamond)
+    sisa_gold = total_gold_ingot - cincin_emas_diamond
+    sisa_diamond = total_diamond - cincin_emas_diamond
     
-    profit_gap = nilai_optimal - nilai_mentah
+    cincin_perak_ruby = min(total_silver_ingot, total_ruby)
+    sisa_silver = total_silver_ingot - cincin_perak_ruby
+    sisa_ruby = total_ruby - cincin_perak_ruby
 
-    # --- GENERATE STRUKTURAL TEKS TERMINAL ---
-    report = "🏭 [ALUR PROSES PELEBURAN SMELTER]\n"
-    report += "--------------------------------------\n"
-    report += f"• Silver Ore di-smelt  : {ore_silver} -> +{smelted_silver} Ingot (Sisa: {sisa_ore_silver} Ore)\n"
-    report += f"• Gold Ore di-smelt    : {ore_gold} -> +{smelted_gold} Ingot (Sisa: {sisa_ore_gold} Ore)\n"
-    report += f"• Uncut Diamond matang : {ore_diamond} -> +{smelted_diamond} Gem (Sisa: {sisa_ore_diamond} Ore)\n"
-    report += f"• Uncut Ruby matang    : {ore_ruby} -> +{smelted_ruby} Gem (Sisa: {sisa_ore_ruby} Ore)\n\n"
-
-    report += "🔨 [REKOMENDASI CRAFTING BENCH (LVL 3)]\n"
-    report += "--------------------------------------\n"
-    report += f"⚙️ Komponen Lvl 2 dibuat otomatis dari ingot matang.\n"
-    report += f"🔥 HASIL AKHIR: Buat {crafted_rings}x Silver Diamond Ring\n"
-    report += f"🔥 HASIL AKHIR: Buat {crafted_necklaces}x Gold Ruby Necklace\n\n"
-
-    report += "📦 [SISA LIMPAHAN BAHAN (Dijual Mentah)]\n"
-    report += "--------------------------------------\n"
-    if akhir_silver: report += f"• {akhir_silver} Silver Ingot matang\n"
-    if akhir_gold: report += f"• {akhir_gold} Gold Ingot matang\n"
-    if akhir_diamond: report += f"• {akhir_diamond} Diamond Clean\n"
-    if akhir_ruby: report += f"• {akhir_ruby} Ruby Clean\n"
-    if comp_wire: report += f"• {comp_wire} Silver Wire (Lvl 2 tidak bernilai)\n"
-    if comp_chain: report += f"• {comp_chain} Gold Chain (Lvl 2 tidak bernilai)\n"
+    # --- OUTPUT HASIL ALA TERMINAL DI VIDEO ---
+    report = "🤖 [AI MINING PRODUCTION OPTIMIZER REPORT]\n"
+    report += "======================================================================\n\n"
     
-    report += "\n💰 [ANALISIS TOTAL CUAN PASAR]\n"
-    report += "--------------------------------------\n"
-    report += f"Jika asal Jual Mentah  : Rp {nilai_mentah:,}\n"
-    report += f"Jika Lewat AI Optimizer: Rp {nilai_optimal:,}\n"
-    report += f"--------------------------------------\n"
-    report += f"SELISIH KEUNTUNGAN BERSIH: +Rp {profit_gap:,}\n"
+    report += "⚒️  [HASIL PROSES SMELTER (LEVEL 0 -> LEVEL 1)]:\n"
+    report += f"   • Berhasil melebur: +{smelted_gold} Gold Ingot & +{smelted_silver} Silver Ingot.\n"
+    report += f"   • Berhasil menggosok: +{smelted_diamond} Diamond & +{smelted_ruby} Ruby.\n\n"
+    
+    report += "💍 [REKOMENDASI CRAFTING TERBAIK (PROFIT MAKSIMAL)]:\n"
+    report += "   -------------------------------------------------\n"
+    report += f"   • Buat **{cincin_emas_diamond}x Gold Ring (Diamond)** menggunakan Gold Ingot + Diamond.\n"
+    report += f"   • Buat **{cincin_perak_ruby}x Silver Ring (Ruby)** menggunakan Silver Ingot + Ruby.\n\n"
+    
+    report += "📦 [SISA LIMPAHAN BAHAN UNTUK DIJUAL ECERAN]:\n"
+    report += "   -------------------------------------------------\n"
+    report += f"   • Sisa Bahan: {sisa_gold} Gold Ingot | {sisa_silver} Silver Ingot\n"
+    report += f"   • Sisa Permata: {sisa_diamond} Diamond | {sisa_ruby} Ruby\n\n"
+    
+    report += "💰 [ESTIMASI PROFIT]:\n"
+    report += "   Semua bahan sisa disarankan langsung dicairkan ke NPC Balai Kota untuk menghindari penumpukan komponen kosong yang tidak laku dijual!"
 
-    st.session_state.terminal_output = report
-    st.rerun()
-
-if reset:
-    st.session_state.terminal_output = "Masukkan data inventory Anda, lalu klik 'Hitung Produksi (AI Optimizer)'..."
-    st.rerun()
+    st.markdown(f'<div class="terminal-box">{report}</div>', unsafe_allow_html=True)
