@@ -83,48 +83,7 @@ col0, col1, col2 = st.columns(3)
 
 # --- KOLOM 1: LEVEL 0 ---
 with col0:
-    # Garis penanda warna Oranye di atas judul kolom
     st.markdown("<div style='border-top: 4px solid #f39c12; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
     st.markdown("### Level 0: Raw Materials")
     
-    # Menggunakan container agar semua input otomatis dibungkus di dalam kotak hitam
     with st.container():
-        lvl0_copper = st.number_input("Copper Ore", min_value=0, value=0, step=1)
-        lvl0_iron = st.number_input("Iron Ore", min_value=0, value=0, step=1)
-        lvl0_silver = st.number_input("Silver Ore", min_value=0, value=0, step=1)
-        lvl0_gold = st.number_input("Gold Ore", min_value=0, value=0, step=1)
-        lvl0_aluminium = st.number_input("Aluminium Ore", min_value=0, value=0, step=1)
-        lvl0_coal = st.number_input("Coal", min_value=0, value=0, step=1)
-        lvl0_bottle = st.number_input("Empty Bottle", min_value=0, value=0, step=1)
-        lvl0_emerald = st.number_input("Uncut Emerald", min_value=0, value=0, step=1)
-        lvl0_ruby = st.number_input("Uncut Ruby", min_value=0, value=0, step=1)
-        lvl0_sapphire = st.number_input("Uncut Sapphire", min_value=0, value=0, step=1)
-        lvl0_diamond = st.number_input("Uncut Diamond", min_value=0, value=0, step=1)
-
-# --- KOLOM 2: LEVEL 1 ---
-with col1:
-    # Garis penanda warna Biru di atas judul kolom
-    st.markdown("<div style='border-top: 4px solid #3498db; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Level 1: Ingots & Gems")
-    
-    with st.container():
-        lvl1_gold = st.number_input("Gold Ingot", min_value=0, value=0, step=1)
-        lvl1_silver = st.number_input("Silver Ingot", min_value=0, value=0, step=1)
-        lvl1_iron = st.number_input("Iron Ingot", min_value=0, value=0, step=1)
-        lvl1_copper = st.number_input("Copper Ingot", min_value=0, value=0, step=1)
-        lvl1_aluminium = st.number_input("Aluminium Ingot", min_value=0, value=0, step=1)
-        lvl1_steel = st.number_input("Steel Ingot", min_value=0, value=0, step=1)
-        lvl1_glass = st.number_input("Glass", min_value=0, value=0, step=1)
-        lvl1_emerald = st.number_input("Emerald", min_value=0, value=0, step=1)
-        lvl1_ruby = st.number_input("Ruby", min_value=0, value=0, step=1)
-        lvl1_sapphire = st.number_input("Sapphire", min_value=0, value=0, step=1)
-        lvl1_diamond = st.number_input("Diamond", min_value=0, value=0, step=1)
-
-# --- KOLOM 3: LEVEL 2 ---
-with col2:
-    # Garis penanda warna Merah di atas judul kolom
-    st.markdown("<div style='border-top: 4px solid #e74c3c; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Level 2: Components")
-    
-    with st.container():
-        lvl2_gold_ring = st.number_input("Gold Ring", min_value=0, value=0, step
