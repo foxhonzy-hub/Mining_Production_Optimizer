@@ -1,214 +1,194 @@
 import streamlit as st
 
-# 1. INITIAL PAGE SETTING
+# 1. INITIAL PAGE SETTING (WIDE LAYOUT MATCH)
 st.set_page_config(
     page_title="Mining Production Optimizer v3.1.0",
     page_icon="⛏️",
     layout="wide"
 )
 
-# 2. INJEKSI CSS PRESISI (DARK MODE & COMPACT SPACING 100% MATCH)
+# 2. INJEKSI CSS TOTAL 100% SAMA PERSIS DENGAN UI GAME / GAMBAR
 st.markdown("""
     <style>
+    /* Background dasar aplikasi */
     .stApp { background-color: #0d0d0d !important; }
     
+    /* Judul Utama Atas */
     .main-title {
         color: #f1c40f !important;
         text-align: center;
         font-family: 'Arial', sans-serif;
         font-weight: bold;
-        font-size: 26px;
+        font-size: 28px;
         margin-bottom: 0px;
+        letter-spacing: 0.5px;
     }
     .version-text {
         color: #888888 !important;
         text-align: center;
-        font-size: 12px;
-        margin-bottom: 15px;
+        font-size: 13px;
+        margin-bottom: 20px;
     }
     
-    /* Box Container Kolom Gelap Presisi */
+    /* Box Container Utama untuk Tiap Level (Kotak Abu Gelap Tebal) */
     [data-testid="stColumn"] {
-        background-color: #161616 !important;
-        border: 1px solid #222222 !important;
+        background-color: #1a1a1a !important;
+        border: 1px solid #2d2d2d !important;
         border-radius: 8px !important;
-        padding: 12px !important;
+        padding: 15px 15px 25px 15px !important;
     }
     
-    /* Memangkas Jarak Spasi Vertikal Antar Baris */
-    div[data-testid="stBlock"] {
-        margin-bottom: -14px !important;
+    /* Header Judul Level */
+    .level-title {
+        color: #ffffff !important;
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        font-size: 20px;
+        margin-top: 5px;
+        margin-bottom: 20px;
     }
     
-    /* Gaya Label Item Akurat */
-    .item-label {
-        color: #aaaaaa !important;
+    /* KOTAK BARIS ITEM KUSTOM (Sama persis seperti list di gambar) */
+    .item-row-container {
+        background-color: #242424 !important;
+        border-radius: 4px !important;
+        padding: 6px 12px !important;
+        margin-bottom: 8px !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 40px;
+        border: 1px solid #2a2a2a;
+    }
+    
+    /* Label teks item di kiri */
+    .item-text-left {
+        color: #8a8a8a !important;
         font-size: 13px !important;
-        font-weight: bold !important;
-        margin-top: 5px !important;
-        white-space: nowrap;
-    }
-    .price-label {
-        color: #f1c40f !important;
-        font-size: 13px !important;
-        font-weight: bold !important;
-        margin-top: 5px !important;
-        white-space: nowrap;
+        font-weight: 500 !important;
+        font-family: 'Arial', sans-serif;
     }
     
-    /* Gaya Input Box Angka Pendek Rapi */
-    .stNumberInput div div input {
-        background-color: #111111 !important;
+    /* MENYEMBUNYIKAN TOMBOL + / - BAWAAN STREAMLIT & MERAPIKAN INPUT BOX */
+    .stNumberInput div [data-testid="stNumberInputStepDown"],
+    .stNumberInput div [data-testid="stNumberInputStepUp"] {
+        display: none !important;
+    }
+    .stNumberInput div div div input {
+        background-color: #0f0f0f !important;
         color: #ffffff !important;
         border: 1px solid #333333 !important;
+        border-radius: 4px !important;
         text-align: center !important;
-        height: 28px !important;
         font-size: 13px !important;
-    }
-    
-    /* Kotak Hasil Terminal Hijau */
-    .terminal-box {
-        background-color: #050505 !important;
-        color: #2ecc71 !important;
-        font-family: 'Courier New', Courier, monospace !important;
-        padding: 15px;
-        border-radius: 5px;
-        border: 1px solid #222222;
-        white-space: pre-wrap;
-        margin-top: 15px;
-        font-size: 13px;
-    }
-    
-    /* Tombol Hitung */
-    div.stButton > button:first-child {
-        background-color: #2ecc71 !important;
-        color: #000000 !important;
         font-weight: bold !important;
-        border: none !important;
-        height: 40px;
-        font-size: 14px;
+        height: 28px !important;
+        width: 65px !important;
+        padding: 0px !important;
     }
-    div.stButton > button:first-child:hover { background-color: #27ae60 !important; color: #ffffff !important; }
+    .stNumberInput div div {
+        border: none !important;
+        background-color: transparent !important;
+    }
+    
+    /* Menghapus margin bawaan blok Streamlit agar tidak renggang */
+    div[data-testid="stBlock"] {
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    
+    /* Section Level 3 Grid Lebar */
+    .level3-section-title {
+        color: #f1c40f !important;
+        font-size: 15px !important;
+        font-weight: bold !important;
+        margin-top: 25px !important;
+        margin-bottom: 15px !important;
+        border-bottom: 1px solid #2d2d2d;
+        padding-bottom: 5px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# Judul Utama
-st.markdown('<div class="main-title">Mining Production Optimizer</div>', unsafe_allow_html=True)
-st.markdown('<div class="version-text">v3.1.0</div>', unsafe_allow_html=True)
+# Judul Aplikasi Atas
+st.markdown('<div class="main-title">Mining Production Optimizer <span style="font-size:14px; color:#888888; font-weight:normal;">v3.1.0</span></div>', unsafe_allow_html=True)
+st.write("")
 
-# 3. DATABASE ITEM NYATA
-items_l0 = ["Copper Ore", "Iron Ore", "Silver Ore", "Gold Ore", "Aluminium Ore", "Coal", "Empty Bottle", "Uncut Emerald", "Uncut Ruby", "Uncut Sapphire", "Uncut Diamond"]
-items_l1 = ["Gold Ingot", "Silver Ingot", "Iron Ingot", "Copper Ingot", "Aluminium Ingot", "Steel Ingot", "Glass", "Emerald", "Ruby", "Sapphire", "Diamond"]
-items_l2 = ["Gold Ring", "Silver Ring", "Gold Chain", "Silver Chain", "Gold Earring", "Silver Earring"]
+# 3. CONTEXT REUSABLE COMPONENT (Pembuat baris horizontal presisi)
+def render_game_row(label, key_id, default_val=0):
+    col_label, col_input = st.columns([4, 1])
+    with col_label:
+        st.markdown(f'<div style="margin-top: 5px;" class="item-text-left">{label}</div>', unsafe_allow_html=True)
+    with col_input:
+        val = st.number_input(label, min_value=0, value=default_val, step=1, label_visibility="collapsed", key=key_id)
+    return val
 
-# 4. MEMBUAT LAYOUT 3 KOLOM UTAMA BERJAJAR
-col0, col1, col2 = st.columns(3)
+# 4. SUSUNAN REKREASI 3 KOLOM UTAMA (IMAGE 1A059D)
+c0, c1, c2 = st.columns(3)
 
-# --- KOLOM 1: LEVEL 0 (RAW MATERIALS) ---
-with col0:
-    st.markdown("<div style='border-top: 4px solid #f39c12; margin-bottom: 5px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Level 0: Raw Materials")
+# --- KOLOM 1: LEVEL 0 ---
+with c0:
+    st.markdown("<div style='border-top: 3px solid #f39c12; margin-top:-15px; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="level-title">Level 0: Raw Materials</div>', unsafe_allow_html=True)
     
-    # Toggle Switcher 100% Akurat
-    mode_harga_l0 = st.toggle("⚙️ Edit Harga Pasar (Lvl 0)", key="tg_l0")
-    st.markdown("---")
-    
+    items_l0 = ["Copper Ore", "Iron Ore", "Silver Ore", "Gold Ore", "Aluminium Ore", "Coal", "Empty Bottle", "Uncut Emerald", "Uncut Ruby", "Uncut Sapphire", "Uncut Diamond"]
     stok_l0 = {}
-    harga_l0 = {}
-    
     for i, item in enumerate(items_l0):
-        r_text, r_in = st.columns([3, 2])
-        if mode_harga_l0:
-            r_text.markdown(f'<p class="price-label">💰 {item} ($)</p>', unsafe_allow_html=True)
-            harga_l0[item] = r_in.number_input(f"H0_{item}", min_value=0, value=10, step=5, label_visibility="collapsed", key=f"h0_real_{i}")
-            # Mengamankan stok_l0 agar tidak hilang/error saat dihitung di background
-            stok_l0[item] = st.session_state.get(f"s0_real_{i}", 0)
-        else:
-            r_text.markdown(f'<p class="item-label">{item}</p>', unsafe_allow_html=True)
-            stok_l0[item] = r_in.number_input(f"S0_{item}", min_value=0, value=0, step=1, label_visibility="collapsed", key=f"s0_real_{i}")
-            harga_l0[item] = st.session_state.get(f"h0_real_{i}", 10)
+        st.markdown('<div class="item-row-container">', unsafe_allow_html=True)
+        stok_l0[item] = render_game_row(item, f"l0_in_{i}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# --- KOLOM 2: LEVEL 1 (INGOTS & GEMS) ---
-with col1:
-    st.markdown("<div style='border-top: 4px solid #3498db; margin-bottom: 5px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Level 1: Ingots & Gems")
+# --- KOLOM 2: LEVEL 1 ---
+with c1:
+    st.markdown("<div style='border-top: 3px solid #3498db; margin-top:-15px; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="level-title">Level 1: Ingots & Gems</div>', unsafe_allow_html=True)
     
-    mode_harga_l1 = st.toggle("⚙️ Edit Harga Pasar (Lvl 1)", key="tg_l1")
-    st.markdown("---")
-    
+    items_l1 = ["Gold Ingot", "Silver Ingot", "Iron Ingot", "Copper Ingot", "Aluminium Ingot", "Steel Ingot", "Glass", "Emerald", "Ruby", "Sapphire", "Diamond"]
     stok_l1 = {}
-    harga_l1 = {}
-    
     for i, item in enumerate(items_l1):
-        r_text, r_in = st.columns([3, 2])
-        if mode_harga_l1:
-            r_text.markdown(f'<p class="price-label">💰 {item} ($)</p>', unsafe_allow_html=True)
-            harga_l1[item] = r_in.number_input(f"H1_{item}", min_value=0, value=50, step=10, label_visibility="collapsed", key=f"h1_real_{i}")
-            stok_l1[item] = st.session_state.get(f"s1_real_{i}", 0)
-        else:
-            r_text.markdown(f'<p class="item-label">{item}</p>', unsafe_allow_html=True)
-            stok_l1[item] = r_in.number_input(f"S1_{item}", min_value=0, value=0, step=1, label_visibility="collapsed", key=f"s1_real_{i}")
-            harga_l1[item] = st.session_state.get(f"h1_real_{i}", 50)
+        st.markdown('<div class="item-row-container">', unsafe_allow_html=True)
+        stok_l1[item] = render_game_row(item, f"l1_in_{i}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# --- KOLOM 3: LEVEL 2 (COMPONENTS) ---
-with col2:
-    st.markdown("<div style='border-top: 4px solid #e74c3c; margin-bottom: 5px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Level 2: Components")
+# --- KOLOM 3: LEVEL 2 ---
+with c2:
+    st.markdown("<div style='border-top: 3px solid #e74c3c; margin-top:-15px; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="level-title">Level 2: Components</div>', unsafe_allow_html=True)
     
-    mode_harga_l2 = st.toggle("⚙️ Edit Harga Pasar (Lvl 2)", key="tg_l2")
-    st.markdown("---")
-    
+    items_l2 = ["Gold Ring", "Silver Ring", "Gold Chain", "Silver Chain", "Gold Earring", "Silver Earring"]
     stok_l2 = {}
-    harga_l2 = {}
-    
     for i, item in enumerate(items_l2):
-        r_text, r_in = st.columns([3, 2])
-        if mode_harga_l2:
-            r_text.markdown(f'<p class="price-label">💰 {item} ($)</p>', unsafe_allow_html=True)
-            harga_l2[item] = r_in.number_input(f"H2_{item}", min_value=0, value=150, step=25, label_visibility="collapsed", key=f"h2_real_{i}")
-            stok_l2[item] = st.session_state.get(f"s2_real_{i}", 0)
-        else:
-            r_text.markdown(f'<p class="item-label">{item}</p>', unsafe_allow_html=True)
-            stok_l2[item] = r_in.number_input(f"S2_{item}", min_value=0, value=0, step=1, label_visibility="collapsed", key=f"s2_real_{i}")
-            harga_l2[item] = st.session_state.get(f"h2_real_{i}", 150)
+        st.markdown('<div class="item-row-container">', unsafe_allow_html=True)
+        stok_l2[item] = render_game_row(item, f"l2_in_{i}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-st.write("")
-st.write("")
 
-# 5. PROSES HITUNG LOGIKA INTEGRASI KESELURUHAN (MENGGUNAKAN STATE DATA KEDUA MODE)
-if st.button("🚀 HITUNG PRODUKSI OPTIMAL (AI OPTIMIZER)", use_container_width=True):
-    
-    # Mengambil nilai murni dari state background, dijamin sinkron biarpun sedang di mode harga
-    gold_ore = stok_l0.get("Gold Ore", 0)
-    silver_ore = stok_l0.get("Silver Ore", 0)
-    diamond_uncut = stok_l0.get("Uncut Diamond", 0)
-    gold_ingot_stok = stok_l1.get("Gold Ingot", 0)
-    silver_ingot_stok = stok_l1.get("Silver Ingot", 0)
-    
-    # 1. Logika Peleburan Otomatis (Smelter)
-    smelted_gold = gold_ore // 5
-    smelted_silver = silver_ore // 5
-    
-    total_gold_ingot = gold_ingot_stok + smelted_gold
-    total_silver_ingot = silver_ingot_stok + smelted_silver
-    
-    # 2. Logika Crafting Bench Terbaik (Gold Ring + Diamond)
-    buat_cincin_emas = min(total_gold_ingot, diamond_uncut // 5)
-    
-    # 3. Ambil Harga Komponen dari State Aktif untuk Hitung Value Keuntungan
-    harga_cincin_emas = harga_l2.get("Gold Ring", 150)
-    estimasi_cuan = buat_cincin_emas * harga_cincin_emas
-    
-    # Tampilan Output Laporan Terminal Hijau
-    report = "🤖 [AI MINING PRODUCTION OPTIMIZER REPORT]\n"
-    report += "======================================================================\n\n"
-    report += "⚒️  [HASIL PROSES PELEBURAN SMELTER]:\n"
-    report += f"   • Estimasi peleburan: +{smelted_gold} Gold Ingot & +{smelted_silver} Silver Ingot.\n"
-    report += f"   • Total Stok Siap Pakai: {total_gold_ingot} Gold Ingot & {total_silver_ingot} Silver Ingot.\n\n"
-    report += "💍 [REKOMENDASI CRAFTING BENCH]:\n"
-    report += f"   • Buat {buat_cincin_emas}x Gold Ring menggunakan Diamond.\n"
-    report += f"   • Potensi Nilai Jual Produk: ${estimasi_cuan:,} (Harga Pasar Aktif: ${harga_cincin_emas}/pcs)\n\n"
-    report += "💰 [TIPS PASAR]:\n"
-    report += "   Gunakan toggle switch di atas setiap kolom untuk memperbarui harga pasar secara berkala sebelum menekan tombol hitung!"
+# --- 5. REKREASI GRID LEVEL 3 (BERDASARKAN IMAGE 1933C5) ---
+st.markdown('<div class="level3-section-title">LEVEL 3</div>', unsafe_allow_html=True)
 
-    st.markdown(f'<div class="terminal-box">{report}</div>', unsafe_allow_html=True)
+# Membuat susunan grid 3 kolom horizontal untuk Level 3
+l3_col0, l3_col1, l3_col2 = st.columns(3)
+
+items_l3_c0 = ["Emerald Necklace", "Emerald Ring", "Emerald Earring", "Diamond Earring", "Sapphire Necklace Silver", "Ruby Ring Silver", "Emerald Earring Silver"]
+items_l3_c1 = ["Ruby Necklace", "Ruby Ring", "Ruby Earring", "Emerald Necklace Silver", "Diamond Necklace Silver", "Sapphire Ring Silver", "Ruby Earring Silver"]
+items_l3_c2 = ["Sapphire Necklace", "Sapphire Ring", "Sapphire Earring", "Ruby Necklace Silver", "Emerald Ring Silver", "Diamond Ring Silver", "Sapphire Earring Silver"]
+
+stok_l3 = {}
+
+with l3_col0:
+    for i, item in enumerate(items_l3_c0):
+        st.markdown('<div class="item-row-container">', unsafe_allow_html=True)
+        stok_l3[item] = render_game_row(item, f"l3_c0_{i}")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+with l3_col1:
+    for i, item in enumerate(items_l3_c1):
+        st.markdown('<div class="item-row-container">', unsafe_allow_html=True)
+        stok_l3[item] = render_game_row(item, f"l3_c1_{i}")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+with l3_col2:
+    for i, item in enumerate(items_l3_c2):
+        st.markdown('<div class="item-row-container">', unsafe_allow_html=True)
+        stok_l3[item] = render_game_row(item, f"l3_c2_{i}")
+        st.markdown('</div>', unsafe_allow_html=True)
