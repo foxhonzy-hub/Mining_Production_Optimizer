@@ -85,6 +85,15 @@ st.markdown("""
 st.markdown('<div class="main-title">Mining Production Optimizer</div>', unsafe_allow_html=True)
 st.markdown('<div class="version-text">v3.1.0</div>', unsafe_allow_html=True)
 
+# Fungsi Global pembuat baris input berjejer samping (Aman dari NameError)
+def make_row(label_text, key_name):
+    c_text, c_input = st.columns([2, 1])
+    with c_text:
+        st.markdown(f"<p style='color:#aaaaaa; font-weight:bold; margin-top:8px;'>{label_text}</p>", unsafe_allow_html=True)
+    with c_input:
+        return st.number_input(label_text, min_value=0, value=0, step=1, label_visibility="collapsed", key=key_name)
+
+
 # 3. MEMBUAT 3 KOLOM UTAMA BERJAJAR
 col0, col1, col2 = st.columns(3)
 
@@ -93,18 +102,9 @@ with col0:
     st.markdown("<div style='border-top: 4px solid #f39c12; margin-bottom: 10px;'></div>", unsafe_allow_html=True)
     st.markdown("### Level 0: Raw Materials")
     
-    # Menggunakan sub-kolom internal agar label teks dan tombol input berjejer horizontal
-    def make_row(label_text, key_name):
-        c_text, c_input = st.columns([2, 1])
-        with c_text:
-            st.markdown(f"<p style='color:#aaaaaa; font-weight:bold; margin-top:8px;'>{label_text}</p>", unsafe_allow_html=True)
-        with c_input:
-            return st.number_input(label_text, min_value=0, value=0, step=1, label_visibility="collapsed", key=key_name)
-
     lvl0_copper = make_row("Copper Ore", "l0_cop")
     lvl0_iron = make_row("Iron Ore", "l0_iron")
     lvl0_silver = make_row("Silver Ore", "l0_sil")
     lvl0_gold = make_row("Gold Ore", "l0_gold")
     lvl0_aluminium = make_row("Aluminium Ore", "l0_alum")
-    lvl0_coal = make_row("Coal", "l0_coal")
-    lvl0_bottle
+    lvl0_coal = make_row("Coal", "l0_coal
