@@ -1,182 +1,226 @@
-import tkinter as tk
-import customtkinter as ctk
-from tkinter import messagebox
+import streamlit as st
 
-# Set tema visual mirip di video (Dark Mode)
-ctk.set_appearance_mode("Dark")
-ctk.set_default_color_theme("blue")
+# 1. SETTING PAGE & TEMA GELAP
+st.set_page_config(
+    page_title="Mining Production Optimizer - IME Roleplay",
+    page_icon="⛏️",
+    layout="wide"
+)
 
-class MiningOptimizerApp(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+# 2. INJEKSI CSS CUSTOM (Warna gelap pekat, tombol hijau neon & merah, teks terminal)
+st.markdown("""
+    <style>
+    .stApp { background-color: #1e1e24 !important; }
+    h1, h2, h3 { color: #ffffff !important; font-family: 'Arial', sans-serif; font-weight: bold; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .stNumberInput div div input { background-color: #2d2d34 !important; color: #ffffff !important; border: 1px solid #555555 !important; }
+    label p { color: #e0e0e0 !important; font-weight: 500 !important; }
+    
+    /* KOTAK HASIL KALKULASI (Terminal Hitam) */
+    .terminal-box {
+        background-color: #0c0c0d !important;
+        color: #33ff33 !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        padding: 20px;
+        border-radius: 5px;
+        border: 1px solid #333333;
+        white-space: pre-wrap;
+        height: 580px;
+        overflow-y: auto;
+        box-shadow: inset 0 0 10px #000000;
+    }
+    
+    /* TOMBOL HITUNG (Hijau Neon) */
+    div.stButton > button:first-child {
+        background-color: #2ecc71 !important;
+        color: #000000 !important;
+        font-weight: bold !important;
+        border: none !important;
+        width: 100%;
+        height: 45px;
+    }
+    div.stButton > button:first-child:hover { background-color: #27ae60 !important; color: #ffffff !important; }
+    
+    /* TOMBOL RESET (Merah) */
+    div.stButton > button.reset-btn {
+        background-color: #e74c3c !important;
+        color: #ffffff !important;
+        font-weight: bold !important;
+        border: none !important;
+        width: 100%;
+        height: 45px;
+    }
+    div.stButton > button.reset-btn:hover { background-color: #c0392b !important; }
+    </style>
+""", unsafe_allow_html=True)
 
-        self.title("Mining Production Optimizer - IME Roleplay")
-        self.geometry("700x550")
-        self.resizable(False, False)
+st.markdown("<h1>MINING PRODUCTION OPTIMIZER (FULL LEVEL)</h1>", unsafe_allow_html=True)
 
-        # DEFAULTS HARGA PASAR (Bisa diedit di UI)
-        self.prices = {
-            "silver_ingot": 150,
-            "gold_ingot": 300,
-            "diamond": 500,
-            "ruby": 400,
-            "silver_diamond_ring": 1200,
-            "gold_ruby_necklace": 1500
-        }
+# 3. INITIAL DATABASE HARGA PASAR (NPC)
+if "prices" not in st.session_state:
+    st.session_state.prices = {
+        "silver_ore": 30, "gold_ore": 50, "diamond_ore": 80, "ruby_ore": 70, # Lvl 0
+        "silver_ingot": 150, "gold_ingot": 300, "diamond": 500, "ruby": 400, # Lvl 1
+        "silver_wire": 0, "gold_chain": 0, # Lvl 2 (Tidak laku dijual)
+        "silver_diamond_ring": 1200, "gold_ruby_necklace": 1500 # Lvl 3
+    }
 
-        # Variabel untuk Input Inventory
-        self.inv_silver = tk.StringVar(value="0")
-        self.inv_gold = tk.StringVar(value="0")
-        self.inv_diamond = tk.StringVar(value="0")
-        self.inv_ruby = tk.StringVar(value="0")
+if "terminal_output" not in st.session_state:
+    st.session_state.terminal_output = "Masukkan data inventory Anda, lalu klik 'Hitung Produksi (AI Optimizer)'..."
 
-        self.create_widgets()
+# 4. TATA LETAK UTAMA (KIRI: INPUT & EDITOR, KANAN: TERMINAL HASIL)
+col_left, col_right = st.columns([1.1, 0.9])
 
-    def create_widgets(self):
-        # ---- TITLE ----
-        title_label = ctk.CTkLabel(self, text="MINING PRODUCTION OPTIMIZER", font=ctk.CTkFont(size=22, weight="bold"))
-        title_label.pack(pady=15)
-
-        # ---- MAIN FRAME (Split Left & Right) ----
-        main_frame = ctk.CTkFrame(self)
-        main_frame.pack(fill="both", expand=True, padx=20, pady=10)
-
-        # LEFT FRAME: INPUT INVENTORY
-        left_frame = ctk.CTkScrollableFrame(main_frame, width=300, label_text="Inventory Bahan (Level 1)")
-        left_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-
-        self.create_input_field(left_frame, "Silver Ingot:", self.inv_silver)
-        self.create_input_field(left_frame, "Gold Ingot:", self.inv_gold)
-        self.create_input_field(left_frame, "Diamond:", self.inv_diamond)
-        self.create_input_field(left_frame, "Ruby:", self.inv_ruby)
-
-        # Editor Harga Singkat
-        price_label = ctk.CTkLabel(left_frame, text="Editor Harga Pasar (NPC)", font=ctk.CTkFont(weight="bold"))
-        price_label.pack(pady=(15, 5))
-        
-        self.price_entries = {}
-        for item, price in self.prices.items():
-            frame = ctk.CTkFrame(left_frame, fg_color="transparent")
-            frame.pack(fill="x", pady=2)
-            lbl = ctk.CTkLabel(frame, text=f"{item.replace('_', ' ').title()}:", font=ctk.CTkFont(size=11))
-            lbl.pack(side="left")
-            ent = ctk.CTkEntry(frame, width=70, height=22)
-            ent.insert(0, str(price))
-            ent.pack(side="right")
-            self.price_entries[item] = ent
-
-        # RIGHT FRAME: HASIL KALKULASI
-        right_frame = ctk.CTkFrame(main_frame, width=320)
-        right_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
-
-        ctk.CTkLabel(right_frame, text="Hasil Optimal Profit", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=10)
-
-        # Output Box
-        self.result_text = ctk.CTkTextbox(right_frame, width=300, height=280, font=ctk.CTkFont(size=12))
-        self.result_text.pack(pady=5, padx=10)
-        self.result_text.insert("0.0", "Masukkan inventory lalu klik 'Hitung Produksi'...")
-        self.result_text.configure(state="disabled")
-
-        # ACTION BUTTONS
-        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.pack(fill="x", side="bottom", pady=15, padx=20)
-
-        calc_btn = ctk.CTkButton(btn_frame, text="Hitung Produksi (AI Optimizer)", command=self.calculate_optimization, fg_color="#2ecc71", hover_color="#27ae60", text_color="black", font=ctk.CTkFont(weight="bold"))
-        calc_btn.pack(side="left", expand=True, fill="x", padx=5)
-
-        reset_btn = ctk.CTkButton(btn_frame, text="Reset Input", command=self.reset_inputs, fg_color="#e74c3c", hover_color="#c0392b")
-        reset_btn.pack(side="right", expand=True, fill="x", padx=5)
-
-    def create_input_field(self, parent, label_text, variable):
-        frame = ctk.CTkFrame(parent, fg_color="transparent")
-        frame.pack(fill="x", pady=5)
-        label = ctk.CTkLabel(frame, text=label_text, width=120, anchor="w")
-        label.pack(side="left")
-        entry = ctk.CTkEntry(frame, textvariable=variable, width=100)
-        entry.pack(side="right")
-
-    def update_prices_from_ui(self):
-        try:
-            for item in self.prices:
-                self.prices[item] = int(self.price_entries[item].get())
-        except ValueError:
-            messagebox.showerror("Error", "Harga pasar harus berupa angka bulat!")
-
-    def calculate_optimization(self):
-        self.update_prices_from_ui()
-        
-        try:
-            silvers = int(self.inv_silver.get())
-            golds = int(self.inv_gold.get())
-            diamonds = int(self.inv_diamond.get())
-            rubies = int(self.inv_ruby.get())
-        except ValueError:
-            messagebox.showerror("Error", "Jumlah inventory harus berupa angka!")
-            return
-
-        # 1. Hitung Nilai jika Dijual Mentah (Level 1)
-        nilai_mentah = (silvers * self.prices["silver_ingot"] +
-                        golds * self.prices["gold_ingot"] +
-                        diamonds * self.prices["diamond"] +
-                        rubies * self.prices["ruby"])
-
-        # 2. Proses Optimizer Kerajinan Perhiasan (Level 3)
-        # Bikin Silver Diamond Ring
-        crafted_rings = min(silvers, diamonds)
-        sisa_silver = silvers - crafted_rings
-        sisa_diamond = diamonds - crafted_rings
-
-        # Bikin Gold Ruby Necklace
-        crafted_necklaces = min(golds, rubies)
-        sisa_gold = golds - crafted_necklaces
-        sisa_ruby = rubies - crafted_necklaces
-
-        # 3. Hitung Total Nilai Setelah Optimasi (Perhiasan + Sisa Bahan Mentah)
-        nilai_optimal = (crafted_rings * self.prices["silver_diamond_ring"] +
-                         crafted_necklaces * self.prices["gold_ruby_necklace"] +
-                         sisa_silver * self.prices["silver_ingot"] +
-                         sisa_gold * self.prices["gold_ingot"] +
-                         sisa_diamond * self.prices["diamond"] +
-                         sisa_ruby * self.prices["ruby"])
-
-        profit_gap = nilai_optimal - nilai_mentah
-
-        # Tampilkan Hasil ke UI Box
-        self.result_text.configure(state="normal")
-        self.result_text.delete("0.0", "end")
-        
-        report = f"🔨 REKOMENDASI PRODUKSI:\n"
-        report += f"-----------------------------------\n"
-        report += f"• Buat {crafted_rings}x Silver Diamond Ring\n"
-        report += f"• Buat {crafted_necklaces}x Gold Ruby Necklace\n\n"
-        
-        report += f"📦 SISA BAHAN (Dijual Mentah):\n"
-        if sisa_silver: report += f"• {sisa_silver} Silver Ingot\n"
-        if sisa_gold: report += f"• {sisa_gold} Gold Ingot\n"
-        if sisa_diamond: report += f"• {sisa_diamond} Diamond\n"
-        if sisa_ruby: report += f"• {sisa_ruby} Ruby\n"
-        if not any([sisa_silver, sisa_gold, sisa_diamond, sisa_ruby]):
-            report += "• Tidak ada sisa bahan baku!\n"
+with col_left:
+    tab1, tab2 = st.tabs(["🎒 INPUT INVENTORY", "⚙️ EDITOR HARGA NPC"])
+    
+    with tab1:
+        st.markdown("### 🪨 Level 0 - Bahan Mentah (Ore / Kasar)")
+        c0_1, c0_2 = st.columns(2)
+        with c0_1:
+            ore_silver = st.number_input("Silver Ore", min_value=0, value=0, step=1)
+            ore_gold = st.number_input("Gold Ore", min_value=0, value=0, step=1)
+        with c0_2:
+            ore_diamond = st.number_input("Uncut Diamond", min_value=0, value=0, step=1)
+            ore_ruby = st.number_input("Uncut Ruby", min_value=0, value=0, step=1)
             
-        report += f"\n💰 PERBANDINGAN CUAN:\n"
-        report += f"-----------------------------------\n"
-        report += f"Harga Jual Mentah : Rp {nilai_mentah:,}\n"
-        report += f"Harga Jual Optimal: Rp {nilai_optimal:,}\n"
-        report += f"Selisih Keuntungan: +Rp {profit_gap:,}\n"
-        
-        self.result_text.insert("0.0", report)
-        self.result_text.configure(state="disabled")
+        st.markdown("### 🪙 Level 1 - Bahan Matang (Smelted)")
+        c1_1, c1_2 = st.columns(2)
+        with c1_1:
+            ing_silver = st.number_input("Silver Ingot", min_value=0, value=0, step=1)
+            ing_gold = st.number_input("Gold Ingot", min_value=0, value=0, step=1)
+        with c1_2:
+            gem_diamond = st.number_input("Diamond (Clean)", min_value=0, value=0, step=1)
+            gem_ruby = st.number_input("Ruby (Clean)", min_value=0, value=0, step=1)
 
-    def reset_inputs(self):
-        self.inv_silver.set("0")
-        self.inv_gold.set("0")
-        self.inv_diamond.set("0")
-        self.inv_ruby.set("0")
-        self.result_text.configure(state="normal")
-        self.result_text.delete("0.0", "end")
-        self.result_text.insert("0.0", "Masukkan inventory lalu klik 'Hitung Produksi'...")
-        self.result_text.configure(state="disabled")
+        st.markdown("### 🛠️ Level 2 - Sisa Setengah Jadi (Crafted Component)")
+        c2_1, c2_2 = st.columns(2)
+        with c2_1:
+            comp_wire = st.number_input("Silver Wire / Ring Band", min_value=0, value=0, step=1)
+        with c2_2:
+            comp_chain = st.number_input("Gold Chain / Frame", min_value=0, value=0, step=1)
 
-if __name__ == "__main__":
-    app = MiningOptimizerApp()
-    app.mainloop()
+    with tab2:
+        st.markdown("### 💲 Atur Harga Jual ke Pemerintahan/NPC")
+        p = st.session_state.prices
+        ce1, ce2 = st.columns(2)
+        with ce1:
+            p["silver_ore"] = st.number_input("Harga Silver Ore", min_value=0, value=p["silver_ore"])
+            p["gold_ore"] = st.number_input("Harga Gold Ore", min_value=0, value=p["gold_ore"])
+            p["silver_ingot"] = st.number_input("Harga Silver Ingot", min_value=0, value=p["silver_ingot"])
+            p["gold_ingot"] = st.number_input("Harga Gold Ingot", min_value=0, value=p["gold_ingot"])
+            p["silver_diamond_ring"] = st.number_input("Harga Silver Diamond Ring (Lvl 3)", min_value=0, value=p["silver_diamond_ring"])
+        with ce2:
+            p["diamond_ore"] = st.number_input("Harga Uncut Diamond", min_value=0, value=p["diamond_ore"])
+            p["ruby_ore"] = st.number_input("Harga Uncut Ruby", min_value=0, value=p["ruby_ore"])
+            p["diamond"] = st.number_input("Harga Diamond", min_value=0, value=p["diamond"])
+            p["ruby"] = st.number_input("Harga Ruby", min_value=0, value=p["ruby"])
+            p["gold_ruby_necklace"] = st.number_input("Harga Gold Ruby Necklace (Lvl 3)", min_value=0, value=p["gold_ruby_necklace"])
+
+with col_right:
+    st.markdown("### 📊 HASIL ANALISIS OPTIMAL")
+    st.markdown(f'<div class="terminal-box">{st.session_state.terminal_output}</div>', unsafe_allow_html=True)
+    st.write("")
+    
+    # Tombol Kontrol
+    btn_c1, btn_c2 = st.columns(2)
+    with btn_c1:
+        hitung = st.button("Hitung Produksi (AI Optimizer)")
+    with btn_c2:
+        reset = st.button("Reset Input", key="btn_reset")
+        st.markdown("<script>document.querySelectorAll('button')[1].classList.add('reset-btn');</script>", unsafe_allow_html=True)
+
+# 5. LOGIKA PERHITUNGAN AI OPTIMIZER BERTINGKAT
+if hitung:
+    p = st.session_state.prices
+    
+    # --- PROSES SIMULASI PELEBURAN (LEVEL 0 ke LEVEL 1) ---
+    # Asumsi resep game: 5 Ore = 1 Ingot/Gems matang
+    smelted_silver = ore_silver // 5
+    sisa_ore_silver = ore_silver % 5
+    
+    smelted_gold = ore_gold // 5
+    sisa_ore_gold = ore_gold % 5
+    
+    smelted_diamond = ore_diamond // 5
+    sisa_ore_diamond = ore_diamond % 5
+    
+    smelted_ruby = ore_ruby // 5
+    sisa_ore_ruby = ore_ruby % 5
+    
+    # Total akumulasi di Level 1 (Inventory awal + Hasil peleburan Lvl 0)
+    total_silver_ingot = ing_silver + smelted_silver
+    total_gold_ingot = ing_gold + smelted_gold
+    total_diamond = gem_diamond + smelted_diamond
+    total_ruby = gem_ruby + smelted_ruby
+
+    # --- HITUNG HARGA JUAL JIKA LANGSUNG DIJUAL MENTAH (Tanpa Crafting) ---
+    nilai_mentah = (
+        (ore_silver * p["silver_ore"]) + (ore_gold * p["gold_ore"]) + 
+        (ore_diamond * p["diamond_ore"]) + (ore_ruby * p["ruby_ore"]) +
+        (ing_silver * p["silver_ingot"]) + (ing_gold * p["gold_ingot"]) + 
+        (gem_diamond * p["diamond"]) + (gem_ruby * p["ruby"]) +
+        (comp_wire * p["silver_wire"]) + (comp_chain * p["gold_chain"])
+    )
+
+    # --- PROSES CRAFTING PERHIASAN (LEVEL 1 & 2 ke LEVEL 3) ---
+    # Resep Ring: 1 Silver Ingot + 1 Diamond (Komponen Lvl 2 otomatis dibuat & dirakit)
+    crafted_rings = min(total_silver_ingot, total_diamond)
+    akhir_silver = total_silver_ingot - crafted_rings
+    akhir_diamond = total_diamond - crafted_rings
+    
+    # Resep Necklace: 1 Gold Ingot + 1 Ruby
+    crafted_necklaces = min(total_gold_ingot, total_ruby)
+    akhir_gold = total_gold_ingot - crafted_necklaces
+    akhir_ruby = total_ruby - crafted_necklaces
+
+    # --- HITUNG TOTAL NILAI JUAL SETELAH OPTIMASI AI ---
+    nilai_optimal = (
+        (crafted_rings * p["silver_diamond_ring"]) + 
+        (crafted_necklaces * p["gold_ruby_necklace"]) +
+        # Ditambah sisa bahan yang terpaksa dijual eceran karena kekurangan pasangan:
+        (sisa_ore_silver * p["silver_ore"]) + (sisa_ore_gold * p["gold_ore"]) +
+        (sisa_ore_diamond * p["diamond_ore"]) + (sisa_ore_ruby * p["ruby_ore"]) +
+        (akhir_silver * p["silver_ingot"]) + (akhir_gold * p["gold_ingot"]) +
+        (akhir_diamond * p["diamond"]) + (akhir_ruby * p["ruby"]) +
+        (comp_wire * p["silver_wire"]) + (comp_chain * p["gold_chain"])
+    )
+    
+    profit_gap = nilai_optimal - nilai_mentah
+
+    # --- GENERATE STRUKTURAL TEKS TERMINAL ---
+    report = "🏭 [ALUR PROSES PELEBURAN SMELTER]\n"
+    report += "--------------------------------------\n"
+    report += f"• Silver Ore di-smelt  : {ore_silver} -> +{smelted_silver} Ingot (Sisa: {sisa_ore_silver} Ore)\n"
+    report += f"• Gold Ore di-smelt    : {ore_gold} -> +{smelted_gold} Ingot (Sisa: {sisa_ore_gold} Ore)\n"
+    report += f"• Uncut Diamond matang : {ore_diamond} -> +{smelted_diamond} Gem (Sisa: {sisa_ore_diamond} Ore)\n"
+    report += f"• Uncut Ruby matang    : {ore_ruby} -> +{smelted_ruby} Gem (Sisa: {sisa_ore_ruby} Ore)\n\n"
+
+    report += "🔨 [REKOMENDASI CRAFTING BENCH (LVL 3)]\n"
+    report += "--------------------------------------\n"
+    report += f"⚙️ Komponen Lvl 2 dibuat otomatis dari ingot matang.\n"
+    report += f"🔥 HASIL AKHIR: Buat {crafted_rings}x Silver Diamond Ring\n"
+    report += f"🔥 HASIL AKHIR: Buat {crafted_necklaces}x Gold Ruby Necklace\n\n"
+
+    report += "📦 [SISA LIMPAHAN BAHAN (Dijual Mentah)]\n"
+    report += "--------------------------------------\n"
+    if akhir_silver: report += f"• {akhir_silver} Silver Ingot matang\n"
+    if akhir_gold: report += f"• {akhir_gold} Gold Ingot matang\n"
+    if akhir_diamond: report += f"• {akhir_diamond} Diamond Clean\n"
+    if akhir_ruby: report += f"• {akhir_ruby} Ruby Clean\n"
+    if comp_wire: report += f"• {comp_wire} Silver Wire (Lvl 2 tidak bernilai)\n"
+    if comp_chain: report += f"• {comp_chain} Gold Chain (Lvl 2 tidak bernilai)\n"
+    
+    report += "\n💰 [ANALISIS TOTAL CUAN PASAR]\n"
+    report += "--------------------------------------\n"
+    report += f"Jika asal Jual Mentah  : Rp {nilai_mentah:,}\n"
+    report += f"Jika Lewat AI Optimizer: Rp {nilai_optimal:,}\n"
+    report += f"--------------------------------------\n"
+    report += f"SELISIH KEUNTUNGAN BERSIH: +Rp {profit_gap:,}\n"
+
+    st.session_state.terminal_output = report
+    st.rerun()
+
+if reset:
+    st.session_state.terminal_output = "Masukkan data inventory Anda, lalu klik 'Hitung Produksi (AI Optimizer)'..."
+    st.rerun()
