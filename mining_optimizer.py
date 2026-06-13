@@ -83,10 +83,4 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Judul Utama Aplikasi
-st.markdown('<div class="main-title">Mining Production Optimizer</div>', unsafe_allow_html=True)
-st.markdown('<div class="version-text">v3.1.0</div>', unsafe_allow_html=True)
-
-# Fungsi Global pembuat baris input berjejer samping (Aman dan Teliti)
-def make_row(label_text, key_name):
-    c_text, c_input = st.columns([2, 1])
-    with c_text:
+st.markdown('<div class="main-title">Mining Production Optimizer</div>', unsafe_allow_html=True
